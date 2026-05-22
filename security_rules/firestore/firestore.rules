@@ -121,15 +121,15 @@ service cloud.firestore {
     }
 
     function isSupportedUserCollection(collectionId) {
-      return collectionId == '選手'
-        || collectionId == '種目'
-        || collectionId == '記録';
+      return collectionId == 'athletes'
+        || collectionId == 'events'
+        || collectionId == 'records';
     }
 
     function isValidUserDocument(collectionId, data) {
-      return (collectionId == '選手' && isAthlete(data))
-        || (collectionId == '種目' && isEvent(data))
-        || (collectionId == '記録' && isRecord(data));
+      return (collectionId == 'athletes' && isAthlete(data))
+        || (collectionId == 'events' && isEvent(data))
+        || (collectionId == 'records' && isRecord(data));
     }
 
     match /users/{userId} {
