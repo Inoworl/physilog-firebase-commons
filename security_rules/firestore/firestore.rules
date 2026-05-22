@@ -26,6 +26,10 @@ service cloud.firestore {
       return !data.keys().hasAny([key]) || data[key] is timestamp;
     }
 
+    function hasOptionalNumber(data, key) {
+      return !data.keys().hasAny([key]) || data[key] is number;
+    }
+
     function isAthlete(data) {
       return data.keys().hasAll([
         'name',
@@ -91,6 +95,11 @@ service cloud.firestore {
           'eventUnitSnapshot',
           'recordedAt',
           'note',
+          'startMs',
+          'endMs',
+          'durationMs',
+          'videoRef',
+          'fps',
           'createdAt',
           'updatedAt'
         ])
@@ -103,6 +112,11 @@ service cloud.firestore {
         && data.value is number
         && data.recordedAt is timestamp
         && hasOptionalString(data, 'note')
+        && hasOptionalNumber(data, 'startMs')
+        && hasOptionalNumber(data, 'endMs')
+        && hasOptionalNumber(data, 'durationMs')
+        && hasOptionalString(data, 'videoRef')
+        && hasOptionalNumber(data, 'fps')
         && hasTimestamps(data);
     }
 

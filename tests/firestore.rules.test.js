@@ -65,6 +65,20 @@ describe('PhysiLog Firestore Security Rules', () => {
     await expectSuccess(db.doc('users/user1/記録/record1').get());
   });
 
+  test('動画計測の記録は計測区間と動画参照を保存できる', async () => {
+    const context = await setupTestEnvironment({ uid: 'user1' });
+    const db = context.firestore();
+
+    await expectSuccess(db.doc('users/user1/記録/videoRecord1').set({
+      ...record,
+      startMs: 1000,
+      endMs: 2234,
+      durationMs: 1234,
+      videoRef: '/tmp/video.mp4',
+      fps: 60
+    }));
+  });
+
   test('他人のデータは読めず書けない', async () => {
     const context = await setupTestEnvironment(
       { uid: 'user2' },
