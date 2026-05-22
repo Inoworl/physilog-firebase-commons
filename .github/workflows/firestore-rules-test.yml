@@ -1,0 +1,63 @@
+name: Firestore Rules Test
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "security_rules/firestore/**"
+      - "tests/**"
+      - "firebase.json"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/firestore-rules-test.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "security_rules/firestore/**"
+      - "tests/**"
+      - "firebase.json"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/firestore-rules-test.yml"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Firestore rules tests
+        run: npm run emulator:test:ci
+        env:
+          CI: true
+          FIRESTORE_EMULATOR_HOST: 127.0.0.1:8080
+
+      - name: Check insecure allow patterns
+        run: |
+          if grep -R "allow read, write: if true" security_rules/firestore; then
+            echo "Insecure unconditional read/write rule found."
+            exit 1
+          fi
+          if ! grep -q "request.auth" security_rules/firestore/firestore.rules; then
+            echo "Firestore rules do not contain auth checks."
+            exit 1
+          fi

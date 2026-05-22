@@ -1,0 +1,136 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isNonEmptyString(value) {
+      return value is string && value.size() > 0;
+    }
+
+    function hasTimestamps(data) {
+      return data.createdAt is timestamp && data.updatedAt is timestamp;
+    }
+
+    function hasOptionalString(data, key) {
+      return !data.keys().hasAny([key]) || data[key] is string;
+    }
+
+    function hasOptionalTimestamp(data, key) {
+      return !data.keys().hasAny([key]) || data[key] is timestamp;
+    }
+
+    function isAthlete(data) {
+      return data.keys().hasAll([
+        'name',
+        'createdAt',
+        'updatedAt'
+      ])
+        && data.keys().hasOnly([
+          'name',
+          'note',
+          'deletedAt',
+          'createdAt',
+          'updatedAt'
+        ])
+        && isNonEmptyString(data.name)
+        && hasOptionalString(data, 'note')
+        && hasOptionalTimestamp(data, 'deletedAt')
+        && hasTimestamps(data);
+    }
+
+    function isEvent(data) {
+      return data.keys().hasAll([
+        'name',
+        'unit',
+        'sortOrder',
+        'createdAt',
+        'updatedAt'
+      ])
+        && data.keys().hasOnly([
+          'name',
+          'unit',
+          'sortOrder',
+          'deletedAt',
+          'createdAt',
+          'updatedAt'
+        ])
+        && isNonEmptyString(data.name)
+        && isNonEmptyString(data.unit)
+        && data.sortOrder is number
+        && hasOptionalTimestamp(data, 'deletedAt')
+        && hasTimestamps(data);
+    }
+
+    function isRecord(data) {
+      return data.keys().hasAll([
+        'athleteId',
+        'eventId',
+        'value',
+        'unit',
+        'athleteNameSnapshot',
+        'eventNameSnapshot',
+        'eventUnitSnapshot',
+        'recordedAt',
+        'createdAt',
+        'updatedAt'
+      ])
+        && data.keys().hasOnly([
+          'athleteId',
+          'eventId',
+          'value',
+          'unit',
+          'athleteNameSnapshot',
+          'eventNameSnapshot',
+          'eventUnitSnapshot',
+          'recordedAt',
+          'note',
+          'createdAt',
+          'updatedAt'
+        ])
+        && isNonEmptyString(data.athleteId)
+        && isNonEmptyString(data.eventId)
+        && isNonEmptyString(data.unit)
+        && isNonEmptyString(data.athleteNameSnapshot)
+        && isNonEmptyString(data.eventNameSnapshot)
+        && isNonEmptyString(data.eventUnitSnapshot)
+        && data.value is number
+        && data.recordedAt is timestamp
+        && hasOptionalString(data, 'note')
+        && hasTimestamps(data);
+    }
+
+    function isSupportedUserCollection(collectionId) {
+      return collectionId == '選手'
+        || collectionId == '種目'
+        || collectionId == '記録';
+    }
+
+    function isValidUserDocument(collectionId, data) {
+      return (collectionId == '選手' && isAthlete(data))
+        || (collectionId == '種目' && isEvent(data))
+        || (collectionId == '記録' && isRecord(data));
+    }
+
+    match /users/{userId} {
+      allow read, write: if false;
+
+      match /{collectionId}/{docId} {
+        allow read, delete: if isOwner(userId)
+          && isSupportedUserCollection(collectionId);
+        allow create, update: if isOwner(userId)
+          && isValidUserDocument(collectionId, request.resource.data);
+      }
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
