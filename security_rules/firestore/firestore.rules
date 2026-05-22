@@ -26,6 +26,12 @@ service cloud.firestore {
       return !data.keys().hasAny([key]) || data[key] is timestamp;
     }
 
+    function hasOptionalNullableTimestamp(data, key) {
+      return !data.keys().hasAny([key])
+        || data[key] == null
+        || data[key] is timestamp;
+    }
+
     function hasOptionalNumber(data, key) {
       return !data.keys().hasAny([key]) || data[key] is number;
     }
@@ -38,14 +44,16 @@ service cloud.firestore {
       ])
         && data.keys().hasOnly([
           'name',
+          'age',
           'note',
           'deletedAt',
           'createdAt',
           'updatedAt'
         ])
         && isNonEmptyString(data.name)
+        && hasOptionalNumber(data, 'age')
         && hasOptionalString(data, 'note')
-        && hasOptionalTimestamp(data, 'deletedAt')
+        && hasOptionalNullableTimestamp(data, 'deletedAt')
         && hasTimestamps(data);
     }
 
