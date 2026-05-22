@@ -4,18 +4,18 @@ PhysiLog の Firestore Security Rules と Firestore データ設計を管理す�
 
 ## Firestore 設計
 
-Firestore の実コレクション名は、アプリの概念に合わせて日本語名を使います。
+Firestore の実コレクション名は、運用・index・外部連携で扱いやすい英語名に統一します。
 
 ```text
 users/{userId}
-  ├─ 選手/{athleteId}
-  ├─ 種目/{eventId}
-  └─ 記録/{recordId}
+  ├─ athletes/{athleteId}
+  ├─ events/{eventId}
+  └─ records/{recordId}
 ```
 
 `users/{userId}` 配下のデータは本人のみ読み書きできます。匿名認証ユーザー、メール認証にリンク済みのユーザーのどちらも `request.auth.uid` が一致すれば同じRulesで扱います。
 
-### 選手
+### athletes
 
 ```js
 {
@@ -27,7 +27,7 @@ users/{userId}
 }
 ```
 
-### 種目
+### events
 
 ```js
 {
@@ -40,9 +40,9 @@ users/{userId}
 }
 ```
 
-### 記録
+### records
 
-`記録` はユーザー直下に置き、選手・種目・日付で横断検索できる形にします。
+`records` はユーザー直下に置き、選手・種目・日付で横断検索できる形にします。
 
 ```js
 {
@@ -64,19 +64,19 @@ users/{userId}
 
 ## なぜ記録をユーザー直下に置くか
 
-`users/{uid}/選手/{athleteId}/記録` のようにネストすると、種目別・日付別の横断検索が難しくなります。PhysiLog は選手・種目・日付で記録を見たいアプリなので、`users/{uid}/記録` に集約します。
+`users/{uid}/athletes/{athleteId}/records` のようにネストすると、種目別・日付別の横断検索が難しくなります。PhysiLog は選手・種目・日付で記録を見たいアプリなので、`users/{uid}/records` に集約します。
 
 想定クエリ:
 
 ```text
 選手詳細:
-users/{uid}/記録 where athleteId == athleteId orderBy recordedAt desc
+users/{uid}/records where athleteId == athleteId orderBy recordedAt desc
 
 種目別:
-users/{uid}/記録 where eventId == eventId orderBy recordedAt desc
+users/{uid}/records where eventId == eventId orderBy recordedAt desc
 
 選手 x 種目:
-users/{uid}/記録 where athleteId == athleteId
+users/{uid}/records where athleteId == athleteId
                  where eventId == eventId
                  orderBy recordedAt desc
 ```

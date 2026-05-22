@@ -45,31 +45,31 @@ describe('PhysiLog Firestore Security Rules', () => {
     const context = await setupTestEnvironment({ uid: 'user1' });
     const db = context.firestore();
 
-    await expectSuccess(db.doc('users/user1/選手/athlete1').set(athlete));
-    await expectSuccess(db.doc('users/user1/選手/athlete1').get());
+    await expectSuccess(db.doc('users/user1/athletes/athlete1').set(athlete));
+    await expectSuccess(db.doc('users/user1/athletes/athlete1').get());
   });
 
   test('認証済みユーザーは自分の種目を作成して読める', async () => {
     const context = await setupTestEnvironment({ uid: 'user1' });
     const db = context.firestore();
 
-    await expectSuccess(db.doc('users/user1/種目/event1').set(event));
-    await expectSuccess(db.doc('users/user1/種目/event1').get());
+    await expectSuccess(db.doc('users/user1/events/event1').set(event));
+    await expectSuccess(db.doc('users/user1/events/event1').get());
   });
 
   test('認証済みユーザーは自分の記録を作成して読める', async () => {
     const context = await setupTestEnvironment({ uid: 'user1' });
     const db = context.firestore();
 
-    await expectSuccess(db.doc('users/user1/記録/record1').set(record));
-    await expectSuccess(db.doc('users/user1/記録/record1').get());
+    await expectSuccess(db.doc('users/user1/records/record1').set(record));
+    await expectSuccess(db.doc('users/user1/records/record1').get());
   });
 
   test('動画計測の記録は計測区間と動画参照を保存できる', async () => {
     const context = await setupTestEnvironment({ uid: 'user1' });
     const db = context.firestore();
 
-    await expectSuccess(db.doc('users/user1/記録/videoRecord1').set({
+    await expectSuccess(db.doc('users/user1/records/videoRecord1').set({
       ...record,
       startMs: 1000,
       endMs: 2234,
@@ -82,30 +82,30 @@ describe('PhysiLog Firestore Security Rules', () => {
   test('他人のデータは読めず書けない', async () => {
     const context = await setupTestEnvironment(
       { uid: 'user2' },
-      { 'users/user1/選手/athlete1': athlete }
+      { 'users/user1/athletes/athlete1': athlete }
     );
     const db = context.firestore();
 
-    await expectFailure(db.doc('users/user1/選手/athlete1').get());
-    await expectFailure(db.doc('users/user1/選手/athlete2').set(athlete));
+    await expectFailure(db.doc('users/user1/athletes/athlete1').get());
+    await expectFailure(db.doc('users/user1/athletes/athlete2').set(athlete));
   });
 
   test('未認証ユーザーはデータを読めず書けない', async () => {
     const context = await setupTestEnvironment(
       null,
-      { 'users/user1/種目/event1': event }
+      { 'users/user1/events/event1': event }
     );
     const db = context.firestore();
 
-    await expectFailure(db.doc('users/user1/種目/event1').get());
-    await expectFailure(db.doc('users/user1/種目/event2').set(event));
+    await expectFailure(db.doc('users/user1/events/event1').get());
+    await expectFailure(db.doc('users/user1/events/event2').set(event));
   });
 
   test('必須フィールドが不足した選手は作成できない', async () => {
     const context = await setupTestEnvironment({ uid: 'user1' });
     const db = context.firestore();
 
-    await expectFailure(db.doc('users/user1/選手/athlete1').set({
+    await expectFailure(db.doc('users/user1/athletes/athlete1').set({
       note: '',
       createdAt: now,
       updatedAt: now
@@ -116,7 +116,7 @@ describe('PhysiLog Firestore Security Rules', () => {
     const context = await setupTestEnvironment({ uid: 'user1' });
     const db = context.firestore();
 
-    await expectFailure(db.doc('users/user1/記録/record1').set({
+    await expectFailure(db.doc('users/user1/records/record1').set({
       athleteId: 'athlete1',
       eventId: 'event1',
       value: 12.34,
@@ -132,7 +132,7 @@ describe('PhysiLog Firestore Security Rules', () => {
     const context = await setupTestEnvironment({ uid: 'user1' });
     const db = context.firestore();
 
-    await expectFailure(db.doc('users/user1/記録/record1').set({
+    await expectFailure(db.doc('users/user1/records/record1').set({
       ...record,
       athleteId: '',
       eventId: ''
@@ -143,17 +143,17 @@ describe('PhysiLog Firestore Security Rules', () => {
     const context = await setupTestEnvironment(
       { uid: 'user1' },
       {
-        'users/user1/選手/athlete1': athlete,
-        'users/user1/種目/event1': event
+        'users/user1/athletes/athlete1': athlete,
+        'users/user1/events/event1': event
       }
     );
     const db = context.firestore();
 
-    await expectSuccess(db.doc('users/user1/選手/athlete1').set({
+    await expectSuccess(db.doc('users/user1/athletes/athlete1').set({
       ...athlete,
       deletedAt: now
     }));
-    await expectSuccess(db.doc('users/user1/種目/event1').set({
+    await expectSuccess(db.doc('users/user1/events/event1').set({
       ...event,
       deletedAt: now
     }));

@@ -1,7 +1,7 @@
 {
   "indexes": [
     {
-      "collectionGroup": "選手",
+      "collectionGroup": "athletes",
       "queryScope": "COLLECTION",
       "fields": [
         {
@@ -15,7 +15,7 @@
       ]
     },
     {
-      "collectionGroup": "種目",
+      "collectionGroup": "events",
       "queryScope": "COLLECTION",
       "fields": [
         {
@@ -33,7 +33,7 @@
       ]
     },
     {
-      "collectionGroup": "記録",
+      "collectionGroup": "records",
       "queryScope": "COLLECTION",
       "fields": [
         {
@@ -47,7 +47,7 @@
       ]
     },
     {
-      "collectionGroup": "記録",
+      "collectionGroup": "records",
       "queryScope": "COLLECTION",
       "fields": [
         {
@@ -61,7 +61,7 @@
       ]
     },
     {
-      "collectionGroup": "記録",
+      "collectionGroup": "records",
       "queryScope": "COLLECTION",
       "fields": [
         {

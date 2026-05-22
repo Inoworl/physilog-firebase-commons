@@ -5,9 +5,9 @@ describe('PhysiLog Firestore indexes', () => {
     fs.readFileSync('security_rules/firestore/firestore.indexes.json', 'utf8')
   ).indexes;
 
-  test('選手一覧はdeletedAtとnameの複合indexで取得できる', () => {
+  test('athletes一覧はdeletedAtとnameの複合indexで取得できる', () => {
     expect(indexes).toContainEqual({
-      collectionGroup: '選手',
+      collectionGroup: 'athletes',
       queryScope: 'COLLECTION',
       fields: [
         { fieldPath: 'deletedAt', order: 'ASCENDING' },
@@ -16,9 +16,9 @@ describe('PhysiLog Firestore indexes', () => {
     });
   });
 
-  test('種目一覧はdeletedAtとsortOrderとnameの複合indexで取得できる', () => {
+  test('events一覧はdeletedAtとsortOrderとnameの複合indexで取得できる', () => {
     expect(indexes).toContainEqual({
-      collectionGroup: '種目',
+      collectionGroup: 'events',
       queryScope: 'COLLECTION',
       fields: [
         { fieldPath: 'deletedAt', order: 'ASCENDING' },
