@@ -14,7 +14,9 @@ describe('PhysiLog Firestore Security Rules', () => {
 
   const athlete = {
     name: '山田太郎',
+    age: 12,
     note: '',
+    deletedAt: null,
     createdAt: now,
     updatedAt: now
   };
@@ -23,6 +25,7 @@ describe('PhysiLog Firestore Security Rules', () => {
     name: '100m',
     unit: '秒',
     sortOrder: 1,
+    deletedAt: null,
     createdAt: now,
     updatedAt: now
   };

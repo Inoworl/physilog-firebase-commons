@@ -20,8 +20,9 @@ users/{userId}
 ```js
 {
   name: string,
+  age?: number,
   note?: string,
-  deletedAt?: Timestamp,
+  deletedAt: Timestamp | null,
   createdAt: Timestamp,
   updatedAt: Timestamp
 }
@@ -34,7 +35,7 @@ users/{userId}
   name: string,
   unit: string,
   sortOrder: number,
-  deletedAt?: Timestamp,
+  deletedAt: Timestamp | null,
   createdAt: Timestamp,
   updatedAt: Timestamp
 }
