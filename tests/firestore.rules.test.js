@@ -37,7 +37,6 @@ describe('PhysiLog Firestore Security Rules', () => {
     unit: '秒',
     athleteNameSnapshot: '山田太郎',
     eventNameSnapshot: '100m',
-    eventUnitSnapshot: '秒',
     recordedAt: now,
     note: '',
     createdAt: now,
@@ -66,6 +65,27 @@ describe('PhysiLog Firestore Security Rules', () => {
 
     await expectSuccess(db.doc('users/user1/records/record1').set(record));
     await expectSuccess(db.doc('users/user1/records/record1').get());
+  });
+
+  test('記録は単位なしの値を保存できる', async () => {
+    const context = await setupTestEnvironment({ uid: 'user1' });
+    const db = context.firestore();
+    const { unit, ...recordWithoutUnit } = record;
+
+    await expectSuccess(db.doc('users/user1/records/record1').set({
+      ...recordWithoutUnit,
+      value: 15
+    }));
+  });
+
+  test('記録はeventUnitSnapshotを保存しない', async () => {
+    const context = await setupTestEnvironment({ uid: 'user1' });
+    const db = context.firestore();
+
+    await expectFailure(db.doc('users/user1/records/record1').set({
+      ...record,
+      eventUnitSnapshot: '秒'
+    }));
   });
 
   test('動画計測の記録は計測区間と動画参照を保存できる', async () => {

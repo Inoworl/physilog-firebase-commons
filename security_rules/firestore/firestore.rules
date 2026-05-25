@@ -87,10 +87,8 @@ service cloud.firestore {
         'athleteId',
         'eventId',
         'value',
-        'unit',
         'athleteNameSnapshot',
         'eventNameSnapshot',
-        'eventUnitSnapshot',
         'recordedAt',
         'createdAt',
         'updatedAt'
@@ -102,7 +100,6 @@ service cloud.firestore {
           'unit',
           'athleteNameSnapshot',
           'eventNameSnapshot',
-          'eventUnitSnapshot',
           'recordedAt',
           'note',
           'startMs',
@@ -115,10 +112,9 @@ service cloud.firestore {
         ])
         && isNonEmptyString(data.athleteId)
         && isNonEmptyString(data.eventId)
-        && isNonEmptyString(data.unit)
+        && hasOptionalString(data, 'unit')
         && isNonEmptyString(data.athleteNameSnapshot)
         && isNonEmptyString(data.eventNameSnapshot)
-        && isNonEmptyString(data.eventUnitSnapshot)
         && data.value is number
         && data.recordedAt is timestamp
         && hasOptionalString(data, 'note')
