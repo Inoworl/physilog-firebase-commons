@@ -25,6 +25,7 @@ describe('PhysiLog Firestore Security Rules', () => {
     name: '100m',
     unit: '秒',
     sortOrder: 1,
+    deletedAt: null,
     createdAt: now,
     updatedAt: now
   };

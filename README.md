@@ -35,7 +35,7 @@ users/{userId}
   name: string,
   unit: string,
   sortOrder: number,
-  deletedAt?: Timestamp,
+  deletedAt: Timestamp | null,
   createdAt: Timestamp,
   updatedAt: Timestamp
 }
