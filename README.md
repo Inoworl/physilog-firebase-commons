@@ -50,17 +50,16 @@ users/{userId}
   eventId: string,
   recordedAt: Timestamp,
   value: number,
-  unit: string,
+  unit?: string,
   athleteNameSnapshot: string,
   eventNameSnapshot: string,
-  eventUnitSnapshot: string,
   note?: string,
   createdAt: Timestamp,
   updatedAt: Timestamp
 }
 ```
 
-`athleteNameSnapshot` / `eventNameSnapshot` / `eventUnitSnapshot` は、選手や種目を後で編集・削除しても過去記録の表示を壊さないために持ちます。
+`athleteNameSnapshot` / `eventNameSnapshot` は、選手や種目を後で編集・削除しても過去記録の表示を壊さないために持ちます。
 
 ## なぜ記録をユーザー直下に置くか
 
