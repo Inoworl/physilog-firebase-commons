@@ -10,10 +10,13 @@ Firestore の実コレクション名は、運用・index・外部連携で扱�
 users/{userId}
   ├─ athletes/{athleteId}
   ├─ events/{eventId}
-  └─ records/{recordId}
+  ├─ records/{recordId}
+  └─ entitlements/current
 ```
 
 `users/{userId}` 配下のデータは本人のみ読み書きできます。匿名認証ユーザー、メール認証にリンク済みのユーザーのどちらも `request.auth.uid` が一致すれば同じRulesで扱います。
+
+`entitlements/current` は課金・モニター権限の判定に使う読み取り専用ドキュメントです。ユーザー本人は読めますが、アプリクライアントからの作成・更新・削除は禁止します。付与や失効は管理者操作、サーバー処理、またはストア通知処理で行います。
 
 ### athletes
 
@@ -61,6 +64,24 @@ users/{userId}
 ```
 
 `athleteNameSnapshot` / `eventNameSnapshot` は、選手や種目を後で編集・削除しても過去記録の表示を壊さないために持ちます。
+
+### entitlements/current
+
+```js
+{
+  plan: 'annual_600' | 'annual_980' | 'monitor_lifetime',
+  source: 'store' | 'manual' | 'promo',
+  status: 'active' | 'expired' | 'revoked',
+  productId?: string,
+  originalTransactionId?: string,
+  purchaseToken?: string,
+  expiresAt?: Timestamp,
+  grantedAt: Timestamp,
+  updatedAt: Timestamp
+}
+```
+
+アプリはこのドキュメントを読み、`status == 'active'` かつ `expiresAt` が未設定または未来日時の場合に全機能を解放します。
 
 ## なぜ記録をユーザー直下に置くか
 

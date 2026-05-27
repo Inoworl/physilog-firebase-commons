@@ -43,6 +43,14 @@ describe('PhysiLog Firestore Security Rules', () => {
     updatedAt: now
   };
 
+  const entitlement = {
+    plan: 'monitor_lifetime',
+    source: 'manual',
+    status: 'active',
+    grantedAt: now,
+    updatedAt: now
+  };
+
   test('認証済みユーザーは自分の選手を作成して読める', async () => {
     const context = await setupTestEnvironment({ uid: 'user1' });
     const db = context.firestore();
@@ -65,6 +73,19 @@ describe('PhysiLog Firestore Security Rules', () => {
 
     await expectSuccess(db.doc('users/user1/records/record1').set(record));
     await expectSuccess(db.doc('users/user1/records/record1').get());
+  });
+
+  test('認証済みユーザーは自分のentitlementを読めるが作成・更新できない', async () => {
+    const context = await setupTestEnvironment(
+      { uid: 'user1' },
+      { 'users/user1/entitlements/current': entitlement }
+    );
+    const db = context.firestore();
+
+    await expectSuccess(db.doc('users/user1/entitlements/current').get());
+    await expectFailure(
+      db.doc('users/user1/entitlements/current').set(entitlement)
+    );
   });
 
   test('記録は単位なしの値を保存できる', async () => {
@@ -105,11 +126,15 @@ describe('PhysiLog Firestore Security Rules', () => {
   test('他人のデータは読めず書けない', async () => {
     const context = await setupTestEnvironment(
       { uid: 'user2' },
-      { 'users/user1/athletes/athlete1': athlete }
+      {
+        'users/user1/athletes/athlete1': athlete,
+        'users/user1/entitlements/current': entitlement
+      }
     );
     const db = context.firestore();
 
     await expectFailure(db.doc('users/user1/athletes/athlete1').get());
+    await expectFailure(db.doc('users/user1/entitlements/current').get());
     await expectFailure(db.doc('users/user1/athletes/athlete2').set(athlete));
   });
 

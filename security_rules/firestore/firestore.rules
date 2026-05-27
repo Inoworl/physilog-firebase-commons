@@ -28,12 +28,6 @@ service cloud.firestore {
         || data[key] is timestamp;
     }
 
-    function hasOptionalNullableTimestamp(data, key) {
-      return !data.keys().hasAny([key])
-        || data[key] == null
-        || data[key] is timestamp;
-    }
-
     function hasOptionalNumber(data, key) {
       return !data.keys().hasAny([key]) || data[key] is number;
     }
@@ -140,6 +134,11 @@ service cloud.firestore {
 
     match /users/{userId} {
       allow read, write: if false;
+
+      match /entitlements/{docId} {
+        allow read: if isOwner(userId);
+        allow write: if false;
+      }
 
       match /{collectionId}/{docId} {
         allow read, delete: if isOwner(userId)
