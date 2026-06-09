@@ -28,10 +28,10 @@ service cloud.firestore {
         || data[key] is timestamp;
     }
 
-    function hasOptionalNullableTimestamp(data, key) {
-      return !data.keys().hasAny([key])
-        || data[key] == null
-        || data[key] is timestamp;
+    function isSoftDeletedUpdate(data) {
+      return data.keys().hasOnly(['deletedAt', 'updatedAt'])
+        && data.deletedAt is timestamp
+        && data.updatedAt is timestamp;
     }
 
     function hasOptionalNumber(data, key) {
@@ -144,8 +144,14 @@ service cloud.firestore {
       match /{collectionId}/{docId} {
         allow read, delete: if isOwner(userId)
           && isSupportedUserCollection(collectionId);
-        allow create, update: if isOwner(userId)
+        allow create: if isOwner(userId)
           && isValidUserDocument(collectionId, request.resource.data);
+        allow update: if isOwner(userId)
+          && isSupportedUserCollection(collectionId)
+          && (
+            isValidUserDocument(collectionId, request.resource.data)
+            || isSoftDeletedUpdate(request.resource.data)
+          );
       }
     }
 
