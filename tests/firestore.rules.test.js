@@ -43,6 +43,11 @@ describe('PhysiLog Firestore Security Rules', () => {
     updatedAt: now
   };
 
+  const entitlement = {
+    plan: 'free',
+    updatedAt: now
+  };
+
   test('認証済みユーザーは自分の選手を作成して読める', async () => {
     const context = await setupTestEnvironment({ uid: 'user1' });
     const db = context.firestore();
@@ -111,6 +116,35 @@ describe('PhysiLog Firestore Security Rules', () => {
 
     await expectFailure(db.doc('users/user1/athletes/athlete1').get());
     await expectFailure(db.doc('users/user1/athletes/athlete2').set(athlete));
+  });
+
+  test('認証済みユーザーは自分の権限情報を読める', async () => {
+    const context = await setupTestEnvironment(
+      { uid: 'user1' },
+      { 'users/user1/entitlements/current': entitlement }
+    );
+    const db = context.firestore();
+
+    await expectSuccess(db.doc('users/user1/entitlements/current').get());
+  });
+
+  test('他人の権限情報は読めない', async () => {
+    const context = await setupTestEnvironment(
+      { uid: 'user2' },
+      { 'users/user1/entitlements/current': entitlement }
+    );
+    const db = context.firestore();
+
+    await expectFailure(db.doc('users/user1/entitlements/current').get());
+  });
+
+  test('クライアントは権限情報を書き込めない', async () => {
+    const context = await setupTestEnvironment({ uid: 'user1' });
+    const db = context.firestore();
+
+    await expectFailure(
+      db.doc('users/user1/entitlements/current').set(entitlement)
+    );
   });
 
   test('未認証ユーザーはデータを読めず書けない', async () => {

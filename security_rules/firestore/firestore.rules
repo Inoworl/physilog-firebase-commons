@@ -141,6 +141,11 @@ service cloud.firestore {
     match /users/{userId} {
       allow read, write: if false;
 
+      match /entitlements/{docId} {
+        allow read: if isOwner(userId);
+        allow write: if false;
+      }
+
       match /{collectionId}/{docId} {
         allow read, delete: if isOwner(userId)
           && isSupportedUserCollection(collectionId);
