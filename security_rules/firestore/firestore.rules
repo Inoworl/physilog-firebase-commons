@@ -38,6 +38,11 @@ service cloud.firestore {
       return !data.keys().hasAny([key]) || data[key] is number;
     }
 
+    function hasOptionalEnum(data, key, allowed) {
+      return !data.keys().hasAny([key])
+        || (data[key] is string && data[key] in allowed);
+    }
+
     function isAthlete(data) {
       return data.keys().hasAll([
         'name',
@@ -70,6 +75,8 @@ service cloud.firestore {
         && data.keys().hasOnly([
           'name',
           'unit',
+          'recordType',
+          'measurementMethod',
           'sortOrder',
           'deletedAt',
           'createdAt',
@@ -77,6 +84,8 @@ service cloud.firestore {
         ])
         && isNonEmptyString(data.name)
         && isNonEmptyString(data.unit)
+        && hasOptionalEnum(data, 'recordType', ['time', 'count', 'distance'])
+        && hasOptionalEnum(data, 'measurementMethod', ['video', 'manual'])
         && data.sortOrder is number
         && hasOptionalNullableTimestamp(data, 'deletedAt')
         && hasTimestamps(data);

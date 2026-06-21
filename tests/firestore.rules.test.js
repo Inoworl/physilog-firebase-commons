@@ -59,6 +59,45 @@ describe('PhysiLog Firestore Security Rules', () => {
     await expectSuccess(db.doc('users/user1/events/event1').get());
   });
 
+  test('種目は記録の型と計測方法を保存できる', async () => {
+    const context = await setupTestEnvironment({ uid: 'user1' });
+    const db = context.firestore();
+
+    await expectSuccess(db.doc('users/user1/events/event1').set({
+      ...event,
+      recordType: 'distance',
+      measurementMethod: 'manual'
+    }));
+  });
+
+  test('種目は記録の型と計測方法を省略しても保存できる', async () => {
+    const context = await setupTestEnvironment({ uid: 'user1' });
+    const db = context.firestore();
+
+    // 既存種目（新フィールドなし）も従来どおり保存できる
+    await expectSuccess(db.doc('users/user1/events/event1').set(event));
+  });
+
+  test('不正な記録の型の種目は保存できない', async () => {
+    const context = await setupTestEnvironment({ uid: 'user1' });
+    const db = context.firestore();
+
+    await expectFailure(db.doc('users/user1/events/event1').set({
+      ...event,
+      recordType: 'banana'
+    }));
+  });
+
+  test('不正な計測方法の種目は保存できない', async () => {
+    const context = await setupTestEnvironment({ uid: 'user1' });
+    const db = context.firestore();
+
+    await expectFailure(db.doc('users/user1/events/event1').set({
+      ...event,
+      measurementMethod: 'telepathy'
+    }));
+  });
+
   test('認証済みユーザーは自分の記録を作成して読める', async () => {
     const context = await setupTestEnvironment({ uid: 'user1' });
     const db = context.firestore();
