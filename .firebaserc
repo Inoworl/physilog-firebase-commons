@@ -2,6 +2,6 @@
   "projects": {
     "default": "physilog-dev",
     "dev": "physilog-dev",
-    "prod": "physilog-prod"
+    "prod": "physilog-cb6cd"
   }
 }
