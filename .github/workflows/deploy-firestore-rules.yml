@@ -10,11 +10,19 @@ on:
         options:
           - dev
           - prod
+      deploy:
+        description: "Deploy after tests pass"
+        required: true
+        type: boolean
+        default: false
 
 jobs:
   test-and-deploy:
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
+    env:
+      FIREBASE_CREDENTIALS_JSON: ${{ inputs.environment == 'prod' && secrets.FIREBASE_SERVICE_ACCOUNT_PROD || secrets.FIREBASE_SERVICE_ACCOUNT_DEV }}
+      FIREBASE_SERVICE_ACCOUNT_SECRET_NAME: ${{ inputs.environment == 'prod' && 'FIREBASE_SERVICE_ACCOUNT_PROD' || 'FIREBASE_SERVICE_ACCOUNT_DEV' }}
 
     steps:
       - name: Checkout
@@ -41,10 +49,33 @@ jobs:
           CI: true
           FIRESTORE_EMULATOR_HOST: 127.0.0.1:8080
 
+      - name: Check insecure allow patterns
+        run: |
+          if grep -R "allow read, write: if true" security_rules/firestore; then
+            echo "Insecure unconditional read/write rule found."
+            exit 1
+          fi
+          if ! grep -q "request.auth" security_rules/firestore/firestore.rules; then
+            echo "Firestore rules do not contain auth checks."
+            exit 1
+          fi
+
+      - name: Validate Firebase credentials secret
+        if: ${{ inputs.deploy == true }}
+        run: |
+          if [ -z "$FIREBASE_CREDENTIALS_JSON" ]; then
+            echo "::error::Missing GitHub secret ${FIREBASE_SERVICE_ACCOUNT_SECRET_NAME} for the ${INPUT_ENVIRONMENT} environment."
+            exit 1
+          fi
+        env:
+          INPUT_ENVIRONMENT: ${{ inputs.environment }}
+
       - name: Authenticate to Google Cloud
+        if: ${{ inputs.deploy == true }}
         uses: google-github-actions/auth@v2
         with:
-          credentials_json: ${{ inputs.environment == 'prod' && secrets.FIREBASE_SERVICE_ACCOUNT_PROD || secrets.FIREBASE_SERVICE_ACCOUNT_DEV }}
+          credentials_json: ${{ env.FIREBASE_CREDENTIALS_JSON }}
 
       - name: Deploy Firestore rules and indexes
+        if: ${{ inputs.deploy == true }}
         run: npx firebase-tools deploy --only firestore --project "${{ inputs.environment }}"
