@@ -57,8 +57,13 @@ jobs:
           fi
 
       - name: Install Functions dependencies
-        if: ${{ hashFiles('functions/package-lock.json') != '' }}
-        run: npm --prefix functions ci
+        if: ${{ hashFiles('functions/package.json') != '' }}
+        run: |
+          if [ -f functions/package-lock.json ]; then
+            npm --prefix functions ci
+          else
+            npm --prefix functions install
+          fi
 
       - name: Build Functions
         if: ${{ hashFiles('functions/package.json') != '' }}
