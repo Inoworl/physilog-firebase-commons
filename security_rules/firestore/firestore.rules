@@ -77,6 +77,7 @@ service cloud.firestore {
           'unit',
           'recordType',
           'measurementMethod',
+          'scoreDirection',
           'sortOrder',
           'deletedAt',
           'createdAt',
@@ -86,6 +87,7 @@ service cloud.firestore {
         && isNonEmptyString(data.unit)
         && hasOptionalEnum(data, 'recordType', ['time', 'count', 'distance'])
         && hasOptionalEnum(data, 'measurementMethod', ['video', 'manual'])
+        && hasOptionalEnum(data, 'scoreDirection', ['higher', 'lower', 'none'])
         && data.sortOrder is number
         && hasOptionalNullableTimestamp(data, 'deletedAt')
         && hasTimestamps(data);

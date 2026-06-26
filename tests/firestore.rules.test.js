@@ -98,6 +98,26 @@ describe('PhysiLog Firestore Security Rules', () => {
     }));
   });
 
+  test('種目はベスト方向(scoreDirection)を保存できる', async () => {
+    const context = await setupTestEnvironment({ uid: 'user1' });
+    const db = context.firestore();
+
+    await expectSuccess(db.doc('users/user1/events/event1').set({
+      ...event,
+      scoreDirection: 'none'
+    }));
+  });
+
+  test('不正なベスト方向の種目は保存できない', async () => {
+    const context = await setupTestEnvironment({ uid: 'user1' });
+    const db = context.firestore();
+
+    await expectFailure(db.doc('users/user1/events/event1').set({
+      ...event,
+      scoreDirection: 'sideways'
+    }));
+  });
+
   test('認証済みユーザーは自分の記録を作成して読める', async () => {
     const context = await setupTestEnvironment({ uid: 'user1' });
     const db = context.firestore();
