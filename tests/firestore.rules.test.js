@@ -43,6 +43,18 @@ describe('PhysiLog Firestore Security Rules', () => {
     updatedAt: now
   };
 
+  const appVersionSettings = {
+    title: 'アプリの更新',
+    content: '最新バージョンへ更新してください。',
+    forceUpdate: true,
+    iOSLatestVersion: '1.1.0',
+    androidLatestVersion: '1.1.0',
+    iOSMinRequiredVersion: '1.0.0',
+    androidMinRequiredVersion: '1.0.0',
+    appStoreUrl: 'https://apps.apple.com/app/example',
+    googlePlayUrl: 'https://play.google.com/store/apps/details?id=example'
+  };
+
   test('認証済みユーザーは自分の選手を作成して読める', async () => {
     const context = await setupTestEnvironment({ uid: 'user1' });
     const db = context.firestore();
@@ -250,5 +262,32 @@ describe('PhysiLog Firestore Security Rules', () => {
       createdAt: now,
       updatedAt: now
     }));
+  });
+
+  test('認証済みユーザーはアプリバージョン設定を読める', async () => {
+    const context = await setupTestEnvironment(
+      { uid: 'user1' },
+      { 'settings/appVersion': appVersionSettings }
+    );
+    const db = context.firestore();
+
+    await expectSuccess(db.doc('settings/appVersion').get());
+  });
+
+  test('未認証ユーザーはアプリバージョン設定を読めない', async () => {
+    const context = await setupTestEnvironment(
+      null,
+      { 'settings/appVersion': appVersionSettings }
+    );
+    const db = context.firestore();
+
+    await expectFailure(db.doc('settings/appVersion').get());
+  });
+
+  test('クライアントはアプリバージョン設定を書き込めない', async () => {
+    const context = await setupTestEnvironment({ uid: 'user1' });
+    const db = context.firestore();
+
+    await expectFailure(db.doc('settings/appVersion').set(appVersionSettings));
   });
 });
