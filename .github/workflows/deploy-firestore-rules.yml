@@ -1,20 +1,15 @@
-name: Deploy Firestore Rules
+name: Deploy Firebase
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
-    inputs:
-      environment:
-        description: "Deploy target"
-        required: true
-        type: choice
-        options:
-          - dev
-          - prod
 
 jobs:
   test-and-deploy:
     runs-on: ubuntu-latest
-    environment: ${{ inputs.environment }}
+    environment: prod
 
     steps:
       - name: Checkout
@@ -41,10 +36,52 @@ jobs:
           CI: true
           FIRESTORE_EMULATOR_HOST: 127.0.0.1:8080
 
+      - name: Check insecure allow patterns
+        run: |
+          if grep -R "allow read, write: if true" security_rules/firestore; then
+            echo "Insecure unconditional read/write rule found."
+            exit 1
+          fi
+          if ! grep -q "request.auth" security_rules/firestore/firestore.rules; then
+            echo "Firestore rules do not contain auth checks."
+            exit 1
+          fi
+
+      - name: Detect deploy targets
+        id: deploy-targets
+        run: |
+          if [ -d functions ]; then
+            echo "targets=firestore,functions" >> "$GITHUB_OUTPUT"
+          else
+            echo "targets=firestore" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install Functions dependencies
+        if: ${{ hashFiles('functions/package.json') != '' }}
+        run: |
+          if [ -f functions/package-lock.json ]; then
+            npm --prefix functions ci
+          else
+            npm --prefix functions install
+          fi
+
+      - name: Build Functions
+        if: ${{ hashFiles('functions/package.json') != '' }}
+        run: npm --prefix functions run build
+
+      - name: Validate Firebase credentials secret
+        run: |
+          if [ -z "$FIREBASE_SERVICE_ACCOUNT" ]; then
+            echo "::error::Missing GitHub secret FIREBASE_SERVICE_ACCOUNT for the prod environment."
+            exit 1
+          fi
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
-          credentials_json: ${{ inputs.environment == 'prod' && secrets.FIREBASE_SERVICE_ACCOUNT_PROD || secrets.FIREBASE_SERVICE_ACCOUNT_DEV }}
+          credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
 
-      - name: Deploy Firestore rules and indexes
-        run: npx firebase-tools deploy --only firestore --project "${{ inputs.environment }}"
+      - name: Deploy Firebase resources
+        run: npx firebase-tools deploy --only "${{ steps.deploy-targets.outputs.targets }}" --project prod
