@@ -149,6 +149,11 @@ service cloud.firestore {
         || (collectionId == 'records' && isRecord(data));
     }
 
+    match /settings/appVersion {
+      allow read: if isSignedIn();
+      allow write: if false;
+    }
+
     match /users/{userId} {
       allow read, write: if false;
 
