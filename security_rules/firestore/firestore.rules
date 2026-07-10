@@ -43,6 +43,11 @@ service cloud.firestore {
         || (data[key] is string && data[key] in allowed);
     }
 
+    function hasOptionalListMax(data, key, maxSize) {
+      return !data.keys().hasAny([key])
+        || (data[key] is list && data[key].size() <= maxSize);
+    }
+
     function isAthlete(data) {
       return data.keys().hasAll([
         'name',
@@ -85,7 +90,7 @@ service cloud.firestore {
         ])
         && isNonEmptyString(data.name)
         && isNonEmptyString(data.unit)
-        && hasOptionalEnum(data, 'recordType', ['time', 'count', 'distance'])
+        && hasOptionalEnum(data, 'recordType', ['time', 'count', 'distance', 'weight'])
         && hasOptionalEnum(data, 'measurementMethod', ['video', 'manual'])
         && hasOptionalEnum(data, 'scoreDirection', ['higher', 'lower', 'none'])
         && data.sortOrder is number
@@ -118,6 +123,7 @@ service cloud.firestore {
           'durationMs',
           'videoRef',
           'fps',
+          'sets',
           'createdAt',
           'updatedAt'
         ])
@@ -134,6 +140,7 @@ service cloud.firestore {
         && hasOptionalNumber(data, 'durationMs')
         && hasOptionalString(data, 'videoRef')
         && hasOptionalNumber(data, 'fps')
+        && hasOptionalListMax(data, 'sets', 50)
         && hasTimestamps(data);
     }
 
