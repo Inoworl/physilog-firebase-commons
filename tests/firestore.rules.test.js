@@ -173,6 +173,53 @@ describe('PhysiLog Firestore Security Rules', () => {
     }));
   });
 
+  test('ウェイト種目(recordType=weight)を保存できる', async () => {
+    const context = await setupTestEnvironment({ uid: 'user1' });
+    const db = context.firestore();
+
+    await expectSuccess(db.doc('users/user1/events/event1').set({
+      ...event,
+      unit: 'kg',
+      recordType: 'weight'
+    }));
+  });
+
+  test('記録はセット配列(sets)を保存できる', async () => {
+    const context = await setupTestEnvironment({ uid: 'user1' });
+    const db = context.firestore();
+
+    await expectSuccess(db.doc('users/user1/records/weightRecord1').set({
+      ...record,
+      unit: 'kg',
+      value: 80,
+      sets: [
+        { weight: 60, reps: 10 },
+        { weight: 70, reps: 8 },
+        { weight: 80, reps: 5 }
+      ]
+    }));
+  });
+
+  test('setsがlistでない記録は保存できない', async () => {
+    const context = await setupTestEnvironment({ uid: 'user1' });
+    const db = context.firestore();
+
+    await expectFailure(db.doc('users/user1/records/record1').set({
+      ...record,
+      sets: 'notalist'
+    }));
+  });
+
+  test('setsが上限(50)を超える記録は保存できない', async () => {
+    const context = await setupTestEnvironment({ uid: 'user1' });
+    const db = context.firestore();
+
+    await expectFailure(db.doc('users/user1/records/record1').set({
+      ...record,
+      sets: Array.from({ length: 51 }, () => ({ weight: 1, reps: 1 }))
+    }));
+  });
+
   test('他人のデータは読めず書けない', async () => {
     const context = await setupTestEnvironment(
       { uid: 'user2' },
