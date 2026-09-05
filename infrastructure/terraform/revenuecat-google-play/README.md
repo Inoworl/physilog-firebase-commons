@@ -11,19 +11,19 @@ RevenueCatがGoogle Playの購入・定期購入情報を検証するために�
 - Google Play Developer Reporting API
   - `playdeveloperreporting.googleapis.com`
 
-サービスアカウントは`physilog-dev`プロジェクトに1個だけ置き、Google Play Console側で以下の両アプリに限定してアクセスを許可します。
+サービスアカウントは`physilog-dev`プロジェクトに1個だけ置き、Google Play Consoleの「アプリの権限」で以下の両アプリへのアクセスを許可します。
 
 - PhysiLog Dev: `com.inoworl.physilog.dev`
 - PhysiLog: `com.inoworl.physilog`
 
-Google Play Consoleの権限がアプリ単位のアクセス範囲を決めるため、prod用Google Cloudプロジェクト`physilog-cb6cd`に同じサービスアカウントを重複作成しません。
+購入検証に必要な2つの「アカウントの権限」は同一Google Playデベロッパーアカウント内の全アプリに適用されます。dev/prodで同じPlayデベロッパーアカウントを使用するため、prod用Google Cloudプロジェクト`physilog-cb6cd`に同じサービスアカウントを重複作成しません。
 
 ## 管理対象外
 
 次の情報や操作はTerraform stateに含めません。
 
 - サービスアカウント鍵の作成、内容、Base64値
-- Google Play Consoleのアプリ別権限
+- Google Play Consoleのアプリ別権限とアカウント権限
 - RevenueCatへのサービスアカウントJSON登録
 - Pub/Sub、Real-time Developer Notifications（RTDN）
 
@@ -84,14 +84,29 @@ GCPリソースを増やさないため、現段階ではstate保存用GCS bucke
 
 ## Google Play Consoleの手動設定
 
-サービスアカウントを`PhysiLog`と`PhysiLog Dev`へ追加し、両アプリに以下の権限を付与します。
+「ユーザーと権限」でサービスアカウントを開き、「アプリの権限」と「アカウントの権限」を分けて設定します。
+
+### アプリの権限
+
+`PhysiLog`と`PhysiLog Dev`を追加し、両アプリに以下の権限を付与します。
 
 - アプリ情報の閲覧（読み取り専用）
 - 売上データの表示（Purchases APIへのアクセスを含む）
 - 注文と定期購入の管理
 - ストアでの表示の管理
 
-権限変更がRevenueCatへ伝播するまで、最大36時間かかる場合があります。
+### アカウントの権限
+
+RevenueCatのGoogle Play subscription purchase validationには、次の2権限をアカウント権限として付与します。アプリ権限側だけに同種の権限を付与した状態では、credential validatorでGoogle Play Developer APIから`insufficient permissions`が返ることを確認しています。
+
+- 売上データ、注文、解約アンケートの回答の閲覧
+- 注文と定期購入の管理
+
+アカウント権限は同一Playデベロッパーアカウント内の全アプリへ適用されます。権限範囲を抑えるため、現構成では購入検証に必要な上記2権限だけをアカウント権限として付与し、管理者権限やその他のアカウント権限は追加しません。
+
+RevenueCatの[公式手順](https://www.revenuecat.com/docs/service-credentials/creating-play-service-credentials)は4権限すべてをアカウント権限へ付与する構成です。現構成では、カタログ読取に必要な権限を対象2アプリへ限定し、credential validatorでカタログ読取が成功することを確認します。将来RevenueCatからGoogle Playの商品を作成・更新する必要が生じた場合は、追加のアカウント権限を別途レビューします。
+
+権限変更がRevenueCatへ伝播するまで、通常24時間、最大36時間以上かかる場合があります。保存直後に`insufficient permissions`が残っていても権限を重複変更せず、伝播後に再度`Check credentials`を実行します。
 
 ## RevenueCatの手動設定
 

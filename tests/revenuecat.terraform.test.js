@@ -90,6 +90,12 @@ describe('RevenueCat Google Play Terraform configuration', () => {
     expect(readme).toContain('サービスアカウント鍵');
     expect(readme).toContain('Google Play Console');
     expect(readme).toContain('RevenueCat');
+    expect(readme).toContain('アプリの権限');
+    expect(readme).toContain('アカウントの権限');
+    expect(readme).toContain(
+      '売上データ、注文、解約アンケートの回答の閲覧',
+    );
+    expect(readme).toContain('注文と定期購入の管理');
   });
 
   test('validates Terraform in CI without applying infrastructure', () => {
