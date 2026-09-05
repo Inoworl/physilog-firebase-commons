@@ -107,6 +107,9 @@ describe('RevenueCat Google Play Terraform configuration', () => {
     expect(workflow).toContain(
       'npm test -- --runInBand tests/revenuecat.terraform.test.js',
     );
+    expect(workflow).toContain('uses: actions/checkout@v6');
+    expect(workflow).toContain('uses: actions/setup-node@v6');
+    expect(workflow).toContain('uses: hashicorp/setup-terraform@v4.0.1');
     expect(workflow).not.toMatch(/terraform\s+(apply|destroy)/);
   });
 });
