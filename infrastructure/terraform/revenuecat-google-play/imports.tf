@@ -7,3 +7,8 @@ import {
   to = google_project_service.required["androidpublisher.googleapis.com"]
   id = "${var.project_id}/androidpublisher.googleapis.com"
 }
+
+import {
+  to = google_project_service.required["playdeveloperreporting.googleapis.com"]
+  id = "${var.project_id}/playdeveloperreporting.googleapis.com"
+}

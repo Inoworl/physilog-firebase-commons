@@ -43,12 +43,15 @@ describe('RevenueCat Google Play Terraform configuration', () => {
     ]);
   });
 
-  test('imports the existing service account and Android Publisher API', () => {
+  test('imports the existing service account and required APIs', () => {
     const configuration = readTerraformFiles();
 
     expect(configuration).toContain('to = google_service_account.revenuecat');
     expect(configuration).toContain(
       'to = google_project_service.required["androidpublisher.googleapis.com"]',
+    );
+    expect(configuration).toContain(
+      'to = google_project_service.required["playdeveloperreporting.googleapis.com"]',
     );
   });
 
