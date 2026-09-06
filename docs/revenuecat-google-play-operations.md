@@ -158,7 +158,17 @@ RevenueCatのcredential validatorで、次の3項目が成功することを確�
 - `In-app product catalog`を読み取れる
 - `Subscription catalog`とbase plansを読み取れる
 
-1項目でも失敗する場合は、新しい鍵を作り直す前に、project、Android package、サービスアカウントメール、Google Play Consoleの権限、権限伝播時間を確認します。
+`Valid credentials`と3項目の成功だけでは環境分離を確認できません。
+`Credentials Validation Details`を開き、表示されるProject IDが次の値と一致することも確認します。
+
+| RevenueCat environment | Expected service account Project ID |
+| --- | --- |
+| dev | `physilog-dev` |
+| prod | `physilog-cb6cd` |
+
+Play Consoleのアカウント権限は複数アプリへ作用するため、別環境のService Accountでも3項目だけは成功する場合があります。Project ID不一致を成功として扱いません。
+
+1項目でも失敗する場合、またはProject IDが一致しない場合は、新しい鍵を作り直す前に、project、Android package、サービスアカウントメール、Google Play Consoleの権限、権限伝播時間を確認します。
 
 ## 設定確認
 
@@ -216,6 +226,7 @@ gcloud iam service-accounts keys list \
 - [ ] 環境専用サービスアカウントが有効である
 - [ ] Google Play Consoleの対象アプリとアカウント権限が設定されている
 - [ ] RevenueCatのcredential validatorが3項目とも成功している
+- [ ] Credentials Validation DetailsのProject IDが対象環境と一致している
 - [ ] dev/prodで別の鍵とSecret変数を使用している
 - [ ] 一時JSON、クリップボード、作業ログに秘密値が残っていない
 - [ ] 鍵、`.env`、`.p8`がGit差分に含まれていない

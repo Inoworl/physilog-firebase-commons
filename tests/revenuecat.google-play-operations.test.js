@@ -90,6 +90,10 @@ describe('RevenueCat Google Play operations policy', () => {
     expect(runbook).toContain('Google Play subscription purchases');
     expect(runbook).toContain('In-app product catalog');
     expect(runbook).toContain('Subscription catalog');
+    expect(runbook).toContain('Credentials Validation Details');
+    expect(runbook).toContain(
+      'Project ID不一致を成功として扱いません',
+    );
   });
 
   test('documents repeatable verification and recovery procedures', () => {
