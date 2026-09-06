@@ -70,6 +70,10 @@ describe('RevenueCat Google Play operations policy', () => {
 
   test('documents the manual Google Play and RevenueCat checks', () => {
     const runbook = readFile(runbookPath);
+    const appPermissions = runbook.slice(
+      runbook.indexOf('### アプリの権限'),
+      runbook.indexOf('### アカウントの権限'),
+    );
     const accountPermissions = runbook.slice(
       runbook.indexOf('### アカウントの権限'),
       runbook.indexOf('## 鍵の作成と保管'),
@@ -78,14 +82,16 @@ describe('RevenueCat Google Play operations policy', () => {
     expect(runbook).toContain('Google Play Console');
     expect(runbook).toContain('アプリの権限');
     expect(runbook).toContain('アカウントの権限');
-    expect(accountPermissions).toContain(
-      'アプリ情報の閲覧、レポート一括ダウンロード（読み取り専用）',
-    );
+    expect(appPermissions).toContain('アプリ情報の閲覧（読み取り専用）');
+    expect(appPermissions).toContain('ストアでの表示の管理');
     expect(accountPermissions).toContain(
       '売上データ、注文、解約アンケートの回答の閲覧',
     );
     expect(accountPermissions).toContain('注文と定期購入の管理');
-    expect(accountPermissions).toContain('ストアでの表示の管理');
+    expect(accountPermissions).not.toContain('\n- ストアでの表示の管理');
+    expect(runbook).toContain(
+      'devサービスアカウントからprodアプリの権限を削除します',
+    );
     expect(runbook).toContain('RevenueCat');
     expect(runbook).toContain('Google Play subscription purchases');
     expect(runbook).toContain('In-app product catalog');

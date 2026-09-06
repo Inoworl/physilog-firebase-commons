@@ -101,18 +101,21 @@ Google Play Consoleの「ユーザーと権限」で対象サービスアカウ�
 - devサービスアカウント: PhysiLog Dev（`com.inoworl.physilog.dev`）だけを対象にする
 - prodサービスアカウント: PhysiLog（`com.inoworl.physilog`）だけを対象にする
 
-対象アプリを追加したうえで、必要な権限は次の「アカウントの権限」で設定します。devサービスアカウントへprodアプリを、prodサービスアカウントへdevアプリを追加しません。
+対象アプリを追加し、各アプリの「権限を管理」で次の2権限を付与します。
+
+- アプリ情報の閲覧（読み取り専用）
+- ストアでの表示の管理
+
+devサービスアカウントへprodアプリを、prodサービスアカウントへdevアプリを追加しません。既存設定でdevサービスアカウントにprodアプリが追加されている場合は、prod credentialをRevenueCatで検証した後、devサービスアカウントからprodアプリの権限を削除します。切り替え前に削除して購入検証を停止させないでください。
 
 ### アカウントの権限
 
-RevenueCatの公式手順に従い、次の4権限を付与します。
+RevenueCatの公式手順に従い、次の2権限を付与します。この2権限はPlay Consoleの仕様上、デベロッパーアカウント内の全アプリへ作用します。
 
-- アプリ情報の閲覧、レポート一括ダウンロード（読み取り専用）
 - 売上データ、注文、解約アンケートの回答の閲覧
 - 注文と定期購入の管理
-- ストアでの表示の管理
 
-「ストアでの表示の管理」は、RevenueCatからGoogle Playの商品を作成・更新するときにも必要です。管理者権限や無関係なアカウント権限は追加しません。権限変更がRevenueCatへ伝播するまで、通常24時間、最大36時間以上かかる場合があります。保存直後に`insufficient permissions`が表示されても権限を重複変更せず、伝播後に再確認します。
+「ストアでの表示の管理」は、RevenueCatからGoogle Playの商品を作成・更新するときにも必要ですが、対象アプリ側で付与します。管理者権限や無関係なアカウント権限は追加しません。権限変更がRevenueCatへ伝播するまで、通常24時間、最大36時間以上かかる場合があります。保存直後に`insufficient permissions`が表示されても権限を重複変更せず、伝播後に再確認します。
 
 ## 鍵の作成と保管
 
@@ -224,7 +227,8 @@ gcloud iam service-accounts keys list \
 - [ ] 対象環境のproject IDとAndroid packageが一致している
 - [ ] 必要なAPI 2件が有効である
 - [ ] 環境専用サービスアカウントが有効である
-- [ ] Google Play Consoleの対象アプリとアカウント権限が設定されている
+- [ ] Google Play Consoleの対象アプリだけにアプリ権限が設定され、別環境のアプリ権限がない
+- [ ] 売上閲覧と注文管理のアカウント権限が設定されている
 - [ ] RevenueCatのcredential validatorが3項目とも成功している
 - [ ] Credentials Validation DetailsのProject IDが対象環境と一致している
 - [ ] dev/prodで別の鍵とSecret変数を使用している
