@@ -35,8 +35,10 @@ terraform.rc
 # dotenv / secrets
 .env
 .env.*
+.secrets/
 *.pem
 *.key
+*.p8
 
 # OS / editors
 .DS_Store

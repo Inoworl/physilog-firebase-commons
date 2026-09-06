@@ -119,11 +119,10 @@ GitHub Actions では `Deploy Firestore Rules` workflow を手動実行し、`de
 
 どちらも対象Firebase projectへ `Firebase Rules Admin` 相当の権限を持つサービスアカウントJSONを登録します。
 
-## Google Cloudインフラ
+## RevenueCat Google Play連携
 
-RevenueCatからGoogle Playの購入情報を検証するための最小GCP構成は、
-[`infrastructure/terraform/revenuecat-google-play`](infrastructure/terraform/revenuecat-google-play/README.md)
+RevenueCatがGoogle Playの購入情報を検証するための、dev/prod別の初期設定・確認・復旧手順は、
+[`docs/revenuecat-google-play-operations.md`](docs/revenuecat-google-play-operations.md)
 で管理します。
 
-このTerraform構成は、共通moduleからdev/prod別のサービスアカウントとRevenueCatが要求するAPIだけを管理します。
-Pub/SubによるReal-time Developer Notificationsは、必要になるまで構成しません。
+対象がサービスアカウントとAPI有効化だけであり、Google Play ConsoleとRevenueCatの設定は手動操作が必要なため、この構成はTerraform管理しません。秘密鍵はGitに保存しません。
