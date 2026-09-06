@@ -17,8 +17,8 @@ resource "google_project_service" "required" {
 
 resource "google_service_account" "revenuecat" {
   project      = var.project_id
-  account_id   = "physilog-revenuecat"
-  display_name = "PhysiLog RevenueCat"
+  account_id   = var.service_account_id
+  display_name = var.service_account_display_name
   description  = "RevenueCat Google Play subscription validation"
 
   deletion_policy = "PREVENT"

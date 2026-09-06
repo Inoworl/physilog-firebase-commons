@@ -125,5 +125,5 @@ RevenueCatからGoogle Playの購入情報を検証するための最小GCP構�
 [`infrastructure/terraform/revenuecat-google-play`](infrastructure/terraform/revenuecat-google-play/README.md)
 で管理します。
 
-このTerraform構成は、共有サービスアカウントとRevenueCatが要求するAPIだけを管理します。
+このTerraform構成は、共通moduleからdev/prod別のサービスアカウントとRevenueCatが要求するAPIだけを管理します。
 Pub/SubによるReal-time Developer Notificationsは、必要になるまで構成しません。

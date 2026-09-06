@@ -43,9 +43,10 @@ jobs:
 
   validate:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: infrastructure/terraform/revenuecat-google-play
+    strategy:
+      fail-fast: false
+      matrix:
+        environment: [dev, prod]
 
     steps:
       - name: Checkout
@@ -58,9 +59,12 @@ jobs:
 
       - name: Check formatting
         run: terraform fmt -check -recursive
+        working-directory: infrastructure/terraform/revenuecat-google-play
 
       - name: Initialize Terraform
         run: terraform init -backend=false -input=false
+        working-directory: infrastructure/terraform/revenuecat-google-play/environments/${{ matrix.environment }}
 
       - name: Validate Terraform
         run: terraform validate
+        working-directory: infrastructure/terraform/revenuecat-google-play/environments/${{ matrix.environment }}
