@@ -1,6 +1,6 @@
 # RevenueCat Google Play連携 Runbook
 
-更新日: 2026-09-07
+更新日: 2026-09-08（JST）
 
 ## 対象読者と目的
 
@@ -191,7 +191,7 @@ gcloud iam service-accounts describe "$SERVICE_ACCOUNT_EMAIL" \
   --format='value(email,disabled)'
 ```
 
-prodは`PROJECT_ID=physilog-cb6cd`へ置き換えます。APIが2件表示され、サービスアカウントが取得できることを確認します。有効なアカウントの`disabled`は、gcloudのバージョンや出力形式によって空欄または`False`になります。`True`の場合はその鍵を再利用せず、新しいcredentialを作成します。
+prodは`PROJECT_ID=physilog-cb6cd`へ置き換えます。APIが2件表示され、サービスアカウントが取得できることを確認します。有効なアカウントの`disabled`は、gcloudのバージョンや出力形式によって空欄または`False`になります。`True`はサービスアカウント自体の無効化を示すため、鍵を再作成せず、「無効化されたサービスアカウントの復旧」に進みます。
 
 Google Play ConsoleとRevenueCatはCLIだけでは確認できないため、リリース前チェックリストに沿って両方の画面を確認します。
 
@@ -200,6 +200,23 @@ Google Play ConsoleとRevenueCatはCLIだけでは確認できないため、リ
 Terraform stateは存在しないため、端末交換時にstateを移行する必要はありません。Runbookの「設定確認」を実行し、不足している項目だけ「初回設定」から再実行します。API有効化は再実行しても期待状態が変わりません。サービスアカウントが存在する場合、記載したコマンドは新規作成をスキップします。
 
 サービスアカウントを誤って削除した場合は、同じIDで再構築し、新しい鍵を作成してGoogle Play ConsoleとRevenueCatを再設定します。削除前の鍵は復元できません。
+
+### 無効化されたサービスアカウントの復旧
+
+`disabled=True`の場合、サービスアカウント自体を利用できないため、鍵を再作成するだけでは復旧しません。
+
+1. 監査ログと管理者への確認で無効化理由を特定します。理由が未解消の場合や管理者の承認がない場合は、再有効化も代替アカウントへの切り替えも行いません。漏えいなどに伴う無効化では、先に管理者のセキュリティ対応方針を確認します。
+2. 誤操作などで無効化され、同じサービスアカウントの再有効化が承認された場合だけ、対象projectを明示して次を実行します。
+
+```bash
+gcloud iam service-accounts enable "$SERVICE_ACCOUNT_EMAIL" \
+  --project="$PROJECT_ID"
+```
+
+3. 「設定確認」の`describe`を再実行し、`disabled`が空欄または`False`であることを確認します。再有効化だけで既存の有効な鍵を利用できる場合は、鍵を作り直しません。
+4. 同じアカウントを再利用しないと管理者が判断した場合は、承認された環境専用の代替サービスアカウントを用意します。環境の対応表を更新し、「Google Play Consoleの手動設定」「鍵の作成と保管」「RevenueCatの手動設定」を新しいアカウントに対して実施します。無効化の理由を回避するための置換は行いません。
+
+どちらの場合も、RevenueCatの`Credentials Validation Details`で対象環境のProject IDが一致し、購入・商品・Base Planの3項目が成功するまで復旧完了と扱いません。
 
 ## 鍵のローテーションと失効
 
@@ -243,3 +260,4 @@ Google Play ConsoleまたはRevenueCatの必須権限・検証項目が変わっ
 
 - [RevenueCat: Creating Play Service Credentials](https://www.revenuecat.com/docs/service-credentials/creating-play-service-credentials)
 - [Google Play Developer API: Getting Started](https://developers.google.com/android-publisher/getting_started)
+- [Google Cloud IAM: Disabling and enabling service accounts](https://cloud.google.com/iam/docs/service-accounts-disable-enable)

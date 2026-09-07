@@ -114,6 +114,29 @@ describe('RevenueCat Google Play operations policy', () => {
     expect(runbook).toContain('失効');
   });
 
+  test('requires approved account recovery for disabled service accounts', () => {
+    const runbook = readFile(runbookPath);
+    const recoveryStart = runbook.indexOf(
+      '### 無効化されたサービスアカウントの復旧',
+    );
+
+    expect(recoveryStart).toBeGreaterThanOrEqual(0);
+
+    const recovery = runbook.slice(
+      recoveryStart,
+      runbook.indexOf('## 鍵のローテーションと失効', recoveryStart),
+    );
+
+    expect(recovery).toContain('鍵を再作成するだけでは復旧しません');
+    expect(recovery).toContain('無効化理由');
+    expect(recovery).toContain('管理者の承認');
+    expect(recovery).toContain('gcloud iam service-accounts enable');
+    expect(recovery).toContain('--project="$PROJECT_ID"');
+    expect(recovery).toContain('代替サービスアカウント');
+    expect(recovery).toContain('Credentials Validation Details');
+    expect(recovery).toContain('3項目');
+  });
+
   test('protects temporary credentials from Git', () => {
     const gitignore = readFile(path.join(repositoryRoot, '.gitignore'));
     const runbook = readFile(runbookPath);
