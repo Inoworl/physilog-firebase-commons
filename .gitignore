@@ -18,11 +18,27 @@ coverage/
 # Dependencies
 node_modules/
 
+# Terraform local cache, state, and plans
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
+
 # dotenv / secrets
 .env
 .env.*
+.secrets/
 *.pem
 *.key
+*.p8
 
 # OS / editors
 .DS_Store
